@@ -5,6 +5,7 @@ from geopy.distance import geodesic
 from footboll_field.models import FootballField
 from users.models import User
 from utils.geolocations import get_coordinates_from_address
+from django.utils.translation import gettext_lazy as _
 
 
 class Booking(models.Model):
