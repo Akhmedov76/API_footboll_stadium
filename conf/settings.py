@@ -24,7 +24,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'corsheaders',
+    'django_filters',
+    'drf_spectacular',
     # Apps
+    'backend'
 
 ]
 
@@ -112,19 +115,31 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 # EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
-AUTH_USER_MODEL = 'users.User'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-    ),
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+}
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Football Field Booking API',
+    'DESCRIPTION': 'API for booking football fields',
+    'VERSION': '1.0.0',
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+# Bearer token uchun bilan ishlash uchun
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Bearer': {
@@ -133,4 +148,11 @@ SWAGGER_SETTINGS = {
             'in': 'header'
         }
     }
+}
+
+AUTH_USER_MODEL = 'backend.User'
+
+STADIUM_LOCATION = {
+    'latitude': 41.27887409074268,
+    'longitude': 69.21015906570682
 }
