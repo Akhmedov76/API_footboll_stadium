@@ -23,7 +23,9 @@ class FootballFieldViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if user.is_superuser:
             return FootballField.objects.all()
-        return FootballField.objects.filter(owner=user)
+        elif user.role == "manager":
+            return FootballField.objects.filter(owner=user)
+        return FootballField.objects.none()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -36,8 +38,14 @@ class FootballFieldViewSet(viewsets.ModelViewSet):
         if not lat or not lon:
             return Response({"error": "Latitude and longitude are required"}, status=400)
 
-        user_location = Point(float(lon), float(lat), srid=4326)
-        fields = FootballField.objects.annotate(distance=Distance("location", user_location)).order_by("distance")[:10]
+        try:
+            user_location = Point(float(lon), float(lat), srid=4326)
+        except ValueError:
+            return Response({"error": "Invalid latitude or longitude format"}, status=400)
+
+        fields = FootballField.objects.annotate(
+            distance=Distance(Point("longitude", "latitude", srid=4326), user_location)
+        ).order_by("distance")[:10]
 
         data = FootballFieldSerializer(fields, many=True).data
         return Response(data)
@@ -52,6 +60,9 @@ class FootballFieldViewSet(viewsets.ModelViewSet):
 
         start_time = parse_datetime(start_time)
         end_time = parse_datetime(end_time)
+
+        if not start_time or not end_time:
+            return Response({"error": "Invalid datetime format"}, status=400)
 
         booked_fields = FootballField.objects.filter(
             bookings__start_time__lt=end_time,
