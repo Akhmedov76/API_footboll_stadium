@@ -152,7 +152,7 @@ SWAGGER_SETTINGS = {
     }
 }
 
-AUTH_USER_MODEL = 'user.User'
+AUTH_USER_MODEL = 'users.User'
 
 STADIUM_LOCATION = {
     'latitude': 41.27887409074268,
