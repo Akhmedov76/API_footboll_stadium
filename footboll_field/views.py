@@ -9,23 +9,26 @@ from booking.serializers import BookingSerializer
 from footboll_field.models import FootballField
 from footboll_field.serializers import FootballFieldSerializer
 from rest_framework.response import Response
-from utils.geo_near import get_nearest_fields
 
 
 class FootballFieldViewSet(viewsets.ModelViewSet):
+    queryset = FootballField.objects.all()
     serializer_class = FootballFieldSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['price_per_hour']
     search_fields = ['name', 'address']
     ordering_fields = ['price_per_hour', 'created_at']
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
+
         if user.is_superuser:
             return FootballField.objects.all()
-        elif user.role == "manager":
+        elif getattr(user, "role", None) == "manager":
             return FootballField.objects.filter(owner=user)
-        return FootballField.objects.none()
+
+        return FootballField.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
