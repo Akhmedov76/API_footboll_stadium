@@ -2,7 +2,6 @@ from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 from .views import UserViewSet
-from utils import geolocations
 
 router = DefaultRouter()
 router.register(r'users', UserViewSet)

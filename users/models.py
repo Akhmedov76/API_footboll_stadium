@@ -3,19 +3,19 @@ import asyncio
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from utils import geolocations
+
 from utils.geolocations import get_coordinates_from_address
 
 
 class User(AbstractUser):
     ROLES = (
         ('admin', 'Admin'),
-        ('owner', 'Field Owner'),
+        ('manager', 'Manager'),
         ('user', 'User'),
     )
 
     role = models.CharField(max_length=10, choices=ROLES, default='user')
-    phone = models.CharField(max_length=15, blank=True)
+    phone = models.CharField(max_length=15, blank=True, unique=True)
     address = models.TextField(blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
