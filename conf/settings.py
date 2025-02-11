@@ -27,7 +27,9 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_spectacular',
     # Apps
-    'backend'
+    'users',
+    'footboll_field',
+    'booking',
 
 ]
 
@@ -150,7 +152,7 @@ SWAGGER_SETTINGS = {
     }
 }
 
-AUTH_USER_MODEL = 'backend.User'
+AUTH_USER_MODEL = 'user.User'
 
 STADIUM_LOCATION = {
     'latitude': 41.27887409074268,
