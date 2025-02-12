@@ -35,14 +35,24 @@ class FootballFieldViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def nearest(self, request):
-        lat = request.GET.get("lat")
-        lon = request.GET.get("lon")
+        user = request.user
+
+        if user.latitude and user.longitude:
+            lat, lon = user.latitude, user.longitude
+        else:
+            lat = request.GET.get("lat")
+            lon = request.GET.get("lon")
+
+        print(f"Latitude: {lat}, Longitude: {lon}")
 
         if not lat or not lon:
             return Response({"error": "Latitude and longitude are required"}, status=400)
 
         try:
-            user_location = Point(float(lon), float(lat), srid=4326)
+            lat = float(lat)
+            lon = float(lon)
+            user_location = Point(lon, lat)
+            print(user_location)
         except ValueError:
             return Response({"error": "Invalid latitude or longitude format"}, status=400)
 
