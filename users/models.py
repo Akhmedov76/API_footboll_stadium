@@ -25,16 +25,6 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-    # def is_admin(self):
-    #     return self.role == 'admin'
-    #
-    # def is_owner(self):
-    #     return self.role == 'manager'
-
-    # def clean(self):
-    #     if User.objects.filter(phone=self.phone).exclude(id=self.id).exists():
-    #         raise ValidationError("This phone number is already in use.")
-
     def save(self, *args, **kwargs):
         if self.address:
             coordinates = asyncio.run(get_coordinates_from_address(self.address))
