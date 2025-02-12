@@ -1,4 +1,5 @@
 import asyncio
+from math import cos, radians
 
 from django.db import models
 

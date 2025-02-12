@@ -9,11 +9,13 @@ class FootballFieldSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FootballField
-        fields = ('owner','name', 'address', 'description', 'image', 'price_per_hour', 'status')
+        fields = ('id', 'owner', 'name', 'address', 'description', 'image', 'price_per_hour', 'status')
         read_only_fields = ('id', 'created_at', 'updated_at', 'owner')
 
     def create(self, validated_data):
         request = self.context.get('request')
-        if request and request.user.is_authenticated:
-            validated_data['owner'] = request.user
+        if not request.user.is_staff and request.user.role != "manager":
+            raise serializers.ValidationError("Authentication information was not provided!")
+
+        validated_data['owner'] = request.user
         return super().create(validated_data)
