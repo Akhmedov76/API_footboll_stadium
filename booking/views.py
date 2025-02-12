@@ -12,14 +12,11 @@ class BookingViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-
         user = self.request.user
         role = getattr(user, "role", None)
 
-        if role == "admin":
+        if role == "admin" or role == "manager":
             return Booking.objects.all()
-        elif role == "manager":
-            return Booking.objects.filter(field__owner=user)
         return Booking.objects.filter(user=user)
 
 
