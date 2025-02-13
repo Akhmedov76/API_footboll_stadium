@@ -18,14 +18,5 @@ class BookingSerializer(serializers.ModelSerializer):
         if data['start_time'] >= data['end_time']:
             raise serializers.ValidationError("End time must be after start time")
 
-        overlapping = Booking.objects.filter(
-            field=data['field'],
-            start_time__lt=data['end_time'],
-            end_time__gt=data['start_time'],
-            status='CONFIRMED'
-        ).exists()
-
-        if overlapping:
-            raise serializers.ValidationError("This time slot is already booked")
-
-        return data
+    def check_booking_time(self):
+        pass
