@@ -18,5 +18,3 @@ class BookingSerializer(serializers.ModelSerializer):
         if data['start_time'] >= data['end_time']:
             raise serializers.ValidationError("End time must be after start time")
 
-    def check_booking_time(self):
-        pass
