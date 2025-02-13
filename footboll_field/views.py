@@ -18,7 +18,7 @@ class FootballFieldViewSet(viewsets.ModelViewSet):
 
         if user.is_superuser or getattr(user, "role", None) == "manager":
             return FootballField.objects.all()
-        return FootballField.objects.filter(owner=user)
+        return FootballField.objects.all()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
