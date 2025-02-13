@@ -1,16 +1,7 @@
-from django.db.models import F
-from django.db.models.functions import ACos, Cos, Radians, Sin
-from django.db.models import FloatField
-from footboll_field.models import FootballField
+from geopy.distance import geodesic
 
 
-def get_nearest_fields(user_lat, user_lon):
-    fields = FootballField.objects.annotate(
-        distance=ACos(
-            Cos(Radians(user_lat)) * Cos(Radians(F('latitude'))) *
-            Cos(Radians(F('longitude')) - Radians(user_lon)) +
-            Sin(Radians(user_lat)) * Sin(Radians(F('latitude')))
-        ) * 6371
-    ).order_by('distance')
-
-    return fields
+def calculate_distance(starion_lan, stadion_lot, user_lan, user_lon):
+    stadion_coordinates = (starion_lan, stadion_lot)
+    user_coordinates = (user_lan, user_lon)
+    return geodesic(stadion_coordinates, user_coordinates).km

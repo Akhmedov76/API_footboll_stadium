@@ -2,6 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, permissions, filters
 from footboll_field.models import FootballField
 from footboll_field.serializers import FootballFieldSerializer
+from utils.geo_near import calculate_distance
 
 
 class FootballFieldViewSet(viewsets.ModelViewSet):
@@ -22,3 +23,22 @@ class FootballFieldViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+class NearlyStadionField(viewsets.ModelViewSet):
+    serializer_class = FootballFieldSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if not user.latitude or not user.longitude:
+            return FootballField.objects.none()
+
+        nearby_stadions = []
+        for stadion in FootballField.objects.all():
+            distance = calculate_distance(stadion.latitude, stadion.longitude, user.latitude, user.longitude)
+            if distance <= 50:
+                nearby_stadions.append(stadion.id)
+
+        return FootballField.objects.filter(id__in=nearby_stadions)
