@@ -4,7 +4,7 @@ from footboll_field.views import FootballFieldViewSet, NearlyStadionField
 
 router = DefaultRouter()
 router.register(r'football-fields', FootballFieldViewSet, basename='order')
-router.register(r'nearby-fields', NearlyStadionField, basename='nearby-fields')
+router.register(r'nearby-fields', NearlyStadionField, basename='nearby-stadion')
 
 urlpatterns = [
     path('', include(router.urls)),

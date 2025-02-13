@@ -38,7 +38,10 @@ class NearlyStadionField(viewsets.ModelViewSet):
         nearby_stadions = []
         for stadion in FootballField.objects.all():
             distance = calculate_distance(stadion.latitude, stadion.longitude, user.latitude, user.longitude)
+
             if distance <= 50:
                 nearby_stadions.append(stadion.id)
-
+        # print(nearby_stadions)
+        # print(user.latitude, user.longitude)
+        # print(distance)
         return FootballField.objects.filter(id__in=nearby_stadions)
