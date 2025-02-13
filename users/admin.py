@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 
 
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'role', 'phone', 'is_staff', 'is_active')
+    list_display = ('username', 'email', 'role', 'phone', 'address', 'is_staff', 'is_active')
     list_filter = ('role', 'is_staff', 'is_superuser')
     fieldsets = (
         (_('User info'), {'fields': ('username', 'password')}),
