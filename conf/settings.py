@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     # Apps
     'users',
+    'footboll_stadium',
     'footboll_field',
     'booking',
 
