@@ -12,7 +12,7 @@ class FootballStadium(models.Model):
                       ('inactive', 'Inactive')
                       ]
     name = models.CharField(max_length=100)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='fields')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='stadium')
     address = models.TextField()
     contact = models.CharField(max_length=250, blank=True)
     description = models.TextField(blank=True)
@@ -35,6 +35,6 @@ class FootballStadium(models.Model):
         super().save(*args, **kwargs)
 
     class Meta:
-        verbose_name = 'Football Field'
-        verbose_name_plural = 'Football Fields'
+        verbose_name = 'Stadium'
+        verbose_name_plural = 'Stadiums'
         ordering = ['name']

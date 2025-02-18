@@ -24,4 +24,4 @@ admin.site.unregister(Group)
 
 admin.site.site_header = _("Football Stadium")
 admin.site.site_title = _("My Admin")
-admin.site.index_title = _("Welcome to My Dashboard")
+admin.site.index_title = _("Welcome Stadium Admin")
