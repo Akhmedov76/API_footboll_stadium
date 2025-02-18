@@ -1,10 +1,10 @@
 from django.db import models
-from footboll_field.models import FootballField
+from footboll_stadium.models import FootballStadium
 from users.models import User
 
 
 class Booking(models.Model):
-    field = models.ForeignKey(FootballField, on_delete=models.CASCADE, related_name='bookings')
+    field = models.ForeignKey(FootballStadium, on_delete=models.CASCADE, related_name='bookings')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()

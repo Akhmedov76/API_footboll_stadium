@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
 from booking.models import Booking
-from footboll_field.serializers import FootballFieldSerializer
+from footboll_stadium.serializers import FootballStadiumSerializer
 from users.serializers import UserSerializer
 
 
 class BookingSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    field = FootballFieldSerializer(read_only=True)
+    field = FootballStadiumSerializer(read_only=True)
 
     class Meta:
         model = Booking

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from footboll_stadium.models import FootballField
+from footboll_stadium.models import FootballStadium
 
 
 class FootballFieldAdmin(admin.ModelAdmin):
@@ -10,4 +10,4 @@ class FootballFieldAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
 
 
-admin.site.register(FootballField, FootballFieldAdmin)
+admin.site.register(FootballStadium, FootballFieldAdmin)

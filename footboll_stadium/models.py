@@ -7,7 +7,7 @@ from users.models import User
 from utils.geolocations import get_coordinates_from_address
 
 
-class FootballField(models.Model):
+class FootballStadium(models.Model):
     STATUS_CHOICES = [('active', 'Active'),
                       ('inactive', 'Inactive')
                       ]
