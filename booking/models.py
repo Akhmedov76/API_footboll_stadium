@@ -4,17 +4,17 @@ from users.models import User
 
 
 class Booking(models.Model):
+    STATUS_CHOICES = [('pending', 'Pending'),
+                      ('confirmed', 'Confirmed'),
+                      ('cancelled', 'Cancelled')
+                      ]
     field = models.ForeignKey(FootballField, on_delete=models.CASCADE, related_name='bookings')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bookings')
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     status = models.CharField(
         max_length=20,
-        choices=[
-            ('PENDING', 'Pending'),
-            ('CONFIRMED', 'Confirmed'),
-            ('CANCELLED', 'Cancelled'),
-        ],
+        choices=STATUS_CHOICES,
         default='PENDING'
     )
 
@@ -28,7 +28,3 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"{self.field.name} - {self.start_time}"
-
-    def confirm(self):
-        self.status = 'CONFIRMED'
-        self.save()
