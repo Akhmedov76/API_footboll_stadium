@@ -9,14 +9,14 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('booking', '0001_initial'),
         ('footboll_field', '0001_initial'),
+        ('footboll_stadium', '0001_initial'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='booking',
-            name='field',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='bookings', to='footboll_field.footballfield'),
+            model_name='footballfield',
+            name='stadium',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='football_fields', to='footboll_stadium.footballstadium'),
         ),
     ]
