@@ -1,6 +1,5 @@
 from django.db import models
 
-from booking.models import Booking
 from footboll_stadium.models import FootballStadium
 from users.models import User
 
@@ -16,7 +15,6 @@ class FootballField(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    bookings = models.ManyToManyField(Booking, related_name='football_fields')
 
     def __str__(self):
         return self.name
