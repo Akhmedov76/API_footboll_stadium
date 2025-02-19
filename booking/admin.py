@@ -8,10 +8,6 @@ class BookingAdmin(admin.ModelAdmin):
     list_filter = ('status', 'field', 'created_at')
     search_fields = ('user__username', 'field__name')
     ordering = ('-created_at',)
-    date_hierarchy = 'start_time'
-    readonly_fields = ('created_at', 'updated_at')
-
-    actions = ['mark_as_confirmed']
 
     def save_model(self, request, obj, form, change):
         if not change:

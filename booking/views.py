@@ -1,3 +1,5 @@
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions
 
 from booking.models import Booking
@@ -15,3 +17,9 @@ class BookingViewSet(viewsets.ModelViewSet):
         if role == "admin" or role == "manager":
             return Booking.objects.all()
         return Booking.objects.filter(user=user)
+
+
+def confirm_booking(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    booking.confirm()
+    return HttpResponse("Booking has been confirmed!")
