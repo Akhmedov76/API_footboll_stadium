@@ -7,16 +7,15 @@ from booking.serializers import BookingSerializer
 
 
 class BookingViewSet(viewsets.ModelViewSet):
+    queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        user = self.request.user
-        role = getattr(user, "role", None)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
-        if role == "admin" or role == "manager":
-            return Booking.objects.all()
-        return Booking.objects.filter(user=user)
+    def get_queryset(self):
+        return Booking.objects.filter(user=self.request.user)
 
 
 def confirm_booking(request, booking_id):

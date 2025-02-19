@@ -21,10 +21,10 @@ class Booking(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.field.name} - {self.start_time}"
+
     class Meta:
         verbose_name = 'Booking'
         verbose_name_plural = 'Bookings'
         ordering = ['-start_time']
-
-    def __str__(self):
-        return f"{self.field.name} - {self.start_time}"

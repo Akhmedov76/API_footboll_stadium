@@ -1,5 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, permissions, filters
+from rest_framework import viewsets, permissions, filters, status
+from rest_framework.response import Response
+
 from footboll_stadium.models import FootballStadium
 from footboll_stadium.serializers import FootballStadiumSerializer
 from utils.geo_near import calculate_distance
@@ -8,20 +10,11 @@ from utils.geo_near import calculate_distance
 class FootballStadiumViewSet(viewsets.ModelViewSet):
     queryset = FootballStadium.objects.all()
     serializer_class = FootballStadiumSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status']
-    search_fields = ['name', 'address']
-    ordering_fields = ['created_at']
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-        user = self.request.user
-
-        if user.is_superuser or getattr(user, "role", None) == "manager":
-            return FootballStadium.objects.all()
-        return FootballStadium.objects.all()
-
     def perform_create(self, serializer):
+        if not self.request.user.is_staff and self.request.user.role != "manager":
+            return Response({"error": "Only managers can create stadiums."}, status=status.HTTP_403_FORBIDDEN)
         serializer.save(owner=self.request.user)
 
 
