@@ -17,7 +17,6 @@ class FootballStadium(models.Model):
     contact = models.CharField(max_length=250, blank=True)
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to='stadium/', blank=True, null=True)
-    price_per_hour = models.DecimalField(max_digits=10, decimal_places=2)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')

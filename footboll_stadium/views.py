@@ -5,13 +5,13 @@ from footboll_stadium.serializers import FootballStadiumSerializer
 from utils.geo_near import calculate_distance
 
 
-class FootballFieldViewSet(viewsets.ModelViewSet):
+class FootballStadiumViewSet(viewsets.ModelViewSet):
     queryset = FootballStadium.objects.all()
     serializer_class = FootballStadiumSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['price_per_hour']
+    filterset_fields = ['status']
     search_fields = ['name', 'address']
-    ordering_fields = ['price_per_hour', 'created_at']
+    ordering_fields = ['created_at']
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):

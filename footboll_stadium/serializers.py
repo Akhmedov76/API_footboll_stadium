@@ -9,7 +9,7 @@ class FootballStadiumSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FootballStadium
-        fields = ('id', 'owner', 'name', 'address', 'description', 'image', 'price_per_hour', 'status')
+        fields = ('id', 'owner', 'name', 'address', 'description', 'image', 'status')
         read_only_fields = ('id', 'created_at', 'updated_at', 'owner')
 
     def create(self, validated_data):
