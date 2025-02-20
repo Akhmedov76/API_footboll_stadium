@@ -9,7 +9,8 @@ from .serializers import UserSerializer, UserRegistrationSerializer
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get_permissions(self):
         if self.action == 'create':
@@ -29,7 +30,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return UserRegistrationSerializer
         return UserSerializer
 
-    @action(detail=False, methods=['get'])
-    def me(self, request):
-        serializer = self.get_serializer_class()(request.user)
-        return Response(serializer.data)
+    # @action(detail=False, methods=['get'])
+    # def me(self, request):
+    #     serializer = self.get_serializer_class()(request.user)
+    #     return Response(serializer.data)

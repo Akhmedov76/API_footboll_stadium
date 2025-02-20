@@ -15,7 +15,10 @@ class BookingViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
-        return Booking.objects.filter(user=self.request.user)
+        user = self.request.user
+        if user.is_superuser:
+            return Booking.objects.all()
+        return Booking.objects.filter(user=user)
 
 
 def confirm_booking(request, booking_id):
