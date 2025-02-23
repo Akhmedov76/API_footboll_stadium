@@ -54,13 +54,6 @@ class UserView(APIView):
         username = data.get("username")
         password = data.get("password")
 
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT COUNT(*) FROM users_user WHERE username = %s", [username])
-            if cursor.fetchone()[0] > 0:
-                return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
-
-        hashed_password = make_password(password)
-
         role = data.get("role", "user")
         phone = data.get("phone", "")
         address = data.get("address", "")
@@ -68,6 +61,13 @@ class UserView(APIView):
         first_name = data.get("first_name", "")
         last_name = data.get("last_name", "")
         email = data.get("email", "")
+
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM users_user WHERE username = %s", [username])
+            if cursor.fetchone()[0] > 0:
+                return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
+        hashed_password = make_password(password)
 
         with connection.cursor() as cursor:
             cursor.execute("""
