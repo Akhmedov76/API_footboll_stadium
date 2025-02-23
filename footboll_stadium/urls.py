@@ -10,4 +10,5 @@ router.register(r'nearby-stadiums', NearlyStadionField, basename='nearby-stadium
 urlpatterns = [
     path('', include(router.urls)),
     path('v1-stadium/', StadiumViewSet.as_view()),
+    path('v1-stadium/<int:pk>/', StadiumViewSet.as_view()),
 ]

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-11 13:44+0500\n"
+"POT-Creation-Date: 2025-02-23 21:25+0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,26 +18,74 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: backend/admin.py:13
-msgid "Personal info"
-msgstr ""
-
-#: backend/admin.py:14
-msgid "Permissions"
-msgstr ""
-
-#: backend/admin.py:15
-msgid "Important dates"
-msgstr ""
-
-#: conf/settings.py:93
+#: conf/settings.py:103
 msgid "Uzbek"
 msgstr ""
 
-#: conf/settings.py:94
+#: conf/settings.py:104
 msgid "English"
 msgstr ""
 
-#: conf/settings.py:95
+#: conf/settings.py:105
 msgid "Russian"
+msgstr ""
+
+#: footboll_stadium/views.py:61
+msgid "Owner ID is required."
+msgstr ""
+
+#: footboll_stadium/views.py:70
+msgid "Stadium created successfully"
+msgstr ""
+
+#: footboll_stadium/views.py:86
+msgid "Stadium updated successfully"
+msgstr ""
+
+#: footboll_stadium/views.py:94
+msgid "Stadium deleted successfully"
+msgstr ""
+
+#: users/admin.py:13
+msgid "User info"
+msgstr ""
+
+#: users/admin.py:14
+msgid "Personal info"
+msgstr ""
+
+#: users/admin.py:15
+msgid "Permissions"
+msgstr ""
+
+#: users/admin.py:18
+msgid "username"
+msgstr ""
+
+#: users/admin.py:18
+msgid "email"
+msgstr ""
+
+#: users/admin.py:18
+msgid "phone"
+msgstr ""
+
+#: users/admin.py:25
+msgid "Football Stadium"
+msgstr ""
+
+#: users/admin.py:26
+msgid "My Admin"
+msgstr ""
+
+#: users/admin.py:27
+msgid "Welcome Stadium Admin"
+msgstr ""
+
+#: users/models.py:35
+msgid "User"
+msgstr ""
+
+#: users/models.py:36
+msgid "Users"
 msgstr ""

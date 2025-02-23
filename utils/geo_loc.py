@@ -4,7 +4,7 @@ from math import sin, cos, sqrt, atan2, radians
 
 def get_distance(point1, point2):
     R = 6371
-    lat1 = radians(point1[0])  # insert value
+    lat1 = radians(point1[0])
     lon1 = radians(point1[1])
     lat2 = radians(point2[0])
     lon2 = radians(point2[1])

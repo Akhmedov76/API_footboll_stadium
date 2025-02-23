@@ -1,16 +1,14 @@
+from pyexpat.errors import messages
+
 from django.db import connection
-from django.db.models import Q
-from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, permissions, filters, status
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from booking.models import Booking
-from footboll_field.models import FootballField
 from footboll_stadium.models import FootballStadium
 from footboll_stadium.serializers import FootballStadiumSerializer
 from utils.geo_near import calculate_distance
+from django.utils.translation import gettext_lazy as _
 
 
 class FootballStadiumViewSet(viewsets.ModelViewSet):
@@ -32,46 +30,74 @@ class FootballStadiumViewSet(viewsets.ModelViewSet):
 
 
 class StadiumViewSet(APIView):
+    """
+    Get a list all the stadiums
+    """
+
     def get(self, request):
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT id, name, address, contact, status, owner_id FROM footboll_stadium_footballstadium WHERE status = 'active'"
             )
-            stadiums = cursor.fetchall()
-            return Response(stadiums, status=status.HTTP_200_OK)
+            columns = [col[0] for col in cursor.description]
+            stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return Response(stadiums, status=status.HTTP_200_OK)
 
     def post(self, request):
+        """
+        Create a new stadium
+        """
+
         data = request.data
+
         name = data.get("name")
         address = data.get("address")
         contact = data.get("contact", "")
+        description = data.get("description", "")
         image = data.get("image", "")
         owner_id = data.get("owner_id")
-        description = data.get("description", "")
+
+        if not owner_id:
+            return Response({"error": _("Owner ID is required.")}, status=status.HTTP_400_BAD_REQUEST)
 
         with connection.cursor() as cursor:
             cursor.execute(
                 """
-                INSERT INTO footboll_stadium_footballstadium (name, address, contact, image, description, owner_id, status,created_at, updated_at)
+                INSERT INTO footboll_stadium_footballstadium (name, address, contact, description, image, owner_id, status,created_at, updated_at)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, NOW(), NOW()) RETURNING id
             """, [name, address, contact, description, image, owner_id, 'active'])
             stadium_id = cursor.fetchone()[0]
-        return Response({"id": stadium_id}, status=status.HTTP_201_CREATED)
+        return Response({"id": stadium_id, "messages": _("Stadium created successfully")},
+                        status=status.HTTP_201_CREATED)
 
     def put(self, request, pk):
+        """
+        Update a stadium
+        """
         data = request.data
-        name = data.get("name")
-        address = data.get("address")
-        contact = data.get("contact", "")
-        image = data.get("image", "")
-        description = data.get("description", "")
 
         with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT name, address, contact, image, description FROM footboll_stadium_footballstadium WHERE id=%s",
+                [pk]
+            )
+            stadium = cursor.fetchone()
+            if not stadium:
+                return Response({"error": "Stadium not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            name = data.get("name", stadium[0])
+            address = data.get("address", stadium[1])
+            contact = data.get("contact", stadium[2])
+            image = data.get("image", stadium[3])
+            description = data.get("description", stadium[4])
+
             cursor.execute(
                 """
                 UPDATE footboll_stadium_footballstadium SET name=%s, address=%s, contact=%s, image=%s, description=%s, updated_at=NOW() WHERE id=%s
             """, [name, address, contact, image, description, pk])
-        return Response({"message": "Stadium updated successfully"}, status=status.HTTP_200_OK)
+
+        return Response({"message": _("Stadium updated successfully")}, status=status.HTTP_200_OK)
+
 
     def delete(self, request, pk):
         with connection.cursor() as cursor:
@@ -79,7 +105,7 @@ class StadiumViewSet(APIView):
                 """
                 DELETE FROM footboll_stadium_footballstadium WHERE id=%s
             """, [pk])
-        return Response({"message": "Stadium deleted successfully"}, status=status.HTTP_200_OK)
+        return Response({"message": _("Stadium deleted successfully")}, status=status.HTTP_200_OK)
 
 
 class NearlyStadionField(viewsets.ModelViewSet):
@@ -100,6 +126,3 @@ class NearlyStadionField(viewsets.ModelViewSet):
                 nearby_stadions.append(stadion.id)
 
         return FootballStadium.objects.filter(id__in=nearby_stadions)
-
-
-
