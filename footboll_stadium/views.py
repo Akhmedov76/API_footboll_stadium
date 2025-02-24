@@ -149,15 +149,12 @@ class GetNearbyStadium(APIView):
                     f.name AS field_name, 
                     f.price_per_hour, 
                     f.working_hours_start, 
-                    f.working_hours_end, 
-                    b.id AS booking_id, 
-                    b.start_time, 
-                    b.end_time
+                    f.working_hours_end
                 FROM footboll_stadium_footballstadium s
                 JOIN footboll_field_footballfield f ON s.id = f.stadium_id
-                LEFT JOIN booking_booking b ON f.id = b.field_id
                 WHERE s.status = 'active'
             """)
+
             columns = [col[0] for col in cursor.description]
             stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
@@ -171,3 +168,37 @@ class GetNearbyStadium(APIView):
             print(distance)
 
         return Response(nearby_stadions, status=status.HTTP_200_OK)
+
+
+class GetStadiumByFilterTime(APIView):
+    """
+    Get stadiums based filter by time
+    """
+
+    def post(self, request):
+        start_time = request.GET.get('start_time')
+        end_time = request.GET.get('end_time')
+        if not start_time or not end_time:
+            return Response({"error": "Start time and end time are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    s.id AS stadium_id, 
+                    s.name AS stadium_name, 
+                    s.latitude, 
+                    s.longitude,
+                    f.id AS field_id, 
+                    f.name AS field_name, 
+                    f.price_per_hour, 
+                    f.working_hours_start, 
+                    f.working_hours_end
+                FROM footboll_stadium_footballstadium s
+                JOIN footboll_field_footballfield f ON s.id = f.stadium_id
+                WHERE s.status = 'active'
+                    AND (f.working_hours_start <= %s AND f.working_hours_end >= %s)
+            """, [start_time, end_time])
+
+            columns = [col[0] for col in cursor.description]
+            stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        return Response(stadiums, status=status.HTTP_200_OK)
