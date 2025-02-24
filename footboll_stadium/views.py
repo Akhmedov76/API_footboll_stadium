@@ -1,14 +1,12 @@
-from pyexpat.errors import messages
-
 from django.db import connection
-from rest_framework import viewsets, permissions, filters, status
+from django.utils.translation import gettext_lazy as _
+from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from footboll_stadium.models import FootballStadium
 from footboll_stadium.serializers import FootballStadiumSerializer
-from utils.geo_near import calculate_distance
-from django.utils.translation import gettext_lazy as _
+from utils.geo_loc import get_distance
 
 
 class FootballStadiumViewSet(viewsets.ModelViewSet):
@@ -98,7 +96,6 @@ class StadiumViewSet(APIView):
 
         return Response({"message": _("Stadium updated successfully")}, status=status.HTTP_200_OK)
 
-
     def delete(self, request, pk):
         with connection.cursor() as cursor:
             cursor.execute(
@@ -110,7 +107,8 @@ class StadiumViewSet(APIView):
 
 class NearlyStadionField(viewsets.ModelViewSet):
     serializer_class = FootballStadiumSerializer
-    permission_classes = [permissions.IsAuthenticated]
+
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -120,9 +118,39 @@ class NearlyStadionField(viewsets.ModelViewSet):
 
         nearby_stadions = []
         for stadion in FootballStadium.objects.all():
-            distance = calculate_distance(stadion.latitude, stadion.longitude, user.latitude, user.longitude)
-
+            point1 = (stadion.latitude, stadion.longitude,)
+            point2 = (user.latitude, user.longitude,)
+            distance = get_distance(point1, point2)
             if distance <= 50:
                 nearby_stadions.append(stadion.id)
+        print(nearby_stadions)
 
         return FootballStadium.objects.filter(id__in=nearby_stadions)
+
+
+class GetNearbyStadium(APIView):
+    """
+    Get nearby stadiums based on user location
+    """
+
+    def get(self, request):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT id, name, address, contact, status, owner_id, latitude, longitude FROM footboll_stadium_footballstadium WHERE status = 'active'"
+            )
+            columns = [col[0] for col in cursor.description]
+            stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        user = request.user
+        if not user.latitude or not user.longitude:
+            return Response({"error": "User location not available."}, status=status.HTTP_400_BAD_REQUEST)
+
+        nearby_stadions = []
+        for stadium in stadiums:
+            point1 = (stadium['latitude'], stadium['longitude'],)
+            point2 = (user.latitude, user.longitude,)
+            distance = get_distance(point1, point2)
+            if distance <= 50:
+                nearby_stadions.append(stadium['id'])
+
+        return Response(stadiums, status=status.HTTP_200_OK)
