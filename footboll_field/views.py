@@ -97,3 +97,12 @@ class FootballFieldView(APIView):
                 return Response({"error": "Field not found."}, status=status.HTTP_404_NOT_FOUND)
         return Response({"id": football_field_id, "message": "Field updated successfully"},
                         status=status.HTTP_200_OK)
+
+    def delete(self, request, pk):
+        """
+        Delete a football field
+        """
+        with connection.cursor() as cursor:
+            cursor.execute("UPDATE footboll_field_footballfield SET status='inactive' WHERE id=%s", [pk])
+
+        return Response({"message": "Field deleted successfully"}, status=status.HTTP_200_OK)
