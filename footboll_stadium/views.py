@@ -158,16 +158,17 @@ class GetNearbyStadium(APIView):
             columns = [col[0] for col in cursor.description]
             stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-        nearby_stadions = []
+        nearby_stadiums = []
         for stadium in stadiums:
             point1 = (stadium['latitude'], stadium['longitude'])
             point2 = (user.latitude, user.longitude)
             distance = get_distance(point1, point2)
-            if distance <= 50:
-                nearby_stadions.append(stadium)
-            print(distance)
+            distance_km = round(distance, 2)
 
-        return Response(nearby_stadions, status=status.HTTP_200_OK)
+            if distance_km <= 500:
+                nearby_stadiums.append(stadium)
+
+        return Response(nearby_stadiums, status=status.HTTP_200_OK)
 
 
 class GetStadiumByFilterTime(APIView):
@@ -192,11 +193,12 @@ class GetStadiumByFilterTime(APIView):
                     f.name AS field_name, 
                     f.price_per_hour, 
                     f.working_hours_start, 
-                    f.working_hours_end
+                    f.working_hours_end,
+                    b.start_time,
+                    b.end_time 
                 FROM footboll_stadium_footballstadium s
                 JOIN footboll_field_footballfield f ON s.id = f.stadium_id
-                WHERE s.status = 'active'
-                    AND (f.working_hours_start <= %s AND f.working_hours_end >= %s)
+                LEFT JOIN booking_booking b 
             """, [start_time, end_time])
 
             columns = [col[0] for col in cursor.description]
