@@ -11,7 +11,7 @@ class BookingAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if not change:
-            obj.status = 'PENDING'
+            obj.status = 'pending'
         obj.save()
 
 

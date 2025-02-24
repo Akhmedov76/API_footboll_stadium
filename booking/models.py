@@ -1,4 +1,5 @@
 from django.db import models
+
 from footboll_field.models import FootballField
 from users.models import User
 
@@ -15,7 +16,7 @@ class Booking(models.Model):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='pending'
+        default='Pending'
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -134,23 +134,40 @@ class GetNearbyStadium(APIView):
     """
 
     def get(self, request):
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "SELECT id, name, address, contact, status, owner_id, latitude, longitude FROM footboll_stadium_footballstadium WHERE status = 'active'"
-            )
-            columns = [col[0] for col in cursor.description]
-            stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
-
         user = request.user
         if not user.latitude or not user.longitude:
             return Response({"error": "User location not available."}, status=status.HTTP_400_BAD_REQUEST)
 
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT 
+                    s.id AS stadium_id, 
+                    s.name AS stadium_name, 
+                    s.latitude, 
+                    s.longitude,
+                    f.id AS field_id, 
+                    f.name AS field_name, 
+                    f.price_per_hour, 
+                    f.working_hours_start, 
+                    f.working_hours_end, 
+                    b.id AS booking_id, 
+                    b.start_time, 
+                    b.end_time
+                FROM footboll_stadium_footballstadium s
+                JOIN footboll_field_footballfield f ON s.id = f.stadium_id
+                LEFT JOIN booking_booking b ON f.id = b.field_id
+                WHERE s.status = 'active'
+            """)
+            columns = [col[0] for col in cursor.description]
+            stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
         nearby_stadions = []
         for stadium in stadiums:
-            point1 = (stadium['latitude'], stadium['longitude'],)
-            point2 = (user.latitude, user.longitude,)
+            point1 = (stadium['latitude'], stadium['longitude'])
+            point2 = (user.latitude, user.longitude)
             distance = get_distance(point1, point2)
             if distance <= 50:
-                nearby_stadions.append(stadium['id'])
+                nearby_stadions.append(stadium)
+            print(distance)
 
-        return Response(stadiums, status=status.HTTP_200_OK)
+        return Response(nearby_stadions, status=status.HTTP_200_OK)

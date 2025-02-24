@@ -1,6 +1,6 @@
-from pathlib import Path
 import os
 from datetime import timedelta
+from pathlib import Path
 
 from django.utils.translation import gettext_lazy as _
 from dotenv import load_dotenv
@@ -105,7 +105,7 @@ LANGUAGES = [
     ('ru', _('Russian')),
 ]
 
-MODELTRANSLATION_DEFAULT_LANGUAGE = 'uz'
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'en'
 TIME_ZONE = 'Asia/Tashkent'
 USE_I18N = True
 USE_TZ = True
@@ -118,13 +118,6 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = os.getenv('EMAIL_PORT')
-# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (

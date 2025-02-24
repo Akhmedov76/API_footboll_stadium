@@ -37,6 +37,10 @@ class FootballFieldView(APIView):
             )
             columns = [col[0] for col in cursor.description]
             football_fields = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        for fields in football_fields:
+            fields["created_at"] = fields["created_at"].strftime("%d.%m.%Y %H:%M:%S")
+            fields["updated_at"] = fields["updated_at"].strftime("%d.%m.%Y %H:%M:%S")
         return Response(football_fields, status=status.HTTP_200_OK)
 
     def post(self, request):

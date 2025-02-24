@@ -27,6 +27,7 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         if self.address:
             coordinates = asyncio.run(get_coordinates_from_address(self.address))
+            print(coordinates)
             if coordinates:
                 self.latitude, self.longitude = coordinates
         super().save(*args, **kwargs)

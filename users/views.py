@@ -1,16 +1,15 @@
-import hashlib
+import asyncio
 
-from openid.cryptutil import sha256
-from rest_framework import viewsets, permissions
-from social_core.utils import first
 from django.contrib.auth.hashers import make_password
+from django.db import connection
+from rest_framework import status
+from rest_framework import viewsets, permissions
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from utils.geolocations import get_coordinates_from_address
 from .models import User
 from .serializers import UserSerializer, UserRegistrationSerializer
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.db import connection
-from django.shortcuts import get_object_or_404
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -61,6 +60,9 @@ class UserView(APIView):
         first_name = data.get("first_name", "")
         last_name = data.get("last_name", "")
         email = data.get("email", "")
+        is_superuser = data.get("is_superuser", False)
+        is_active = data.get("is_active", True)
+        is_staff = data.get("is_staff", False)
 
         with connection.cursor() as cursor:
             cursor.execute("SELECT COUNT(*) FROM users_user WHERE username = %s", [username])
@@ -69,16 +71,21 @@ class UserView(APIView):
 
         hashed_password = make_password(password)
 
+        coordinate = asyncio.run(get_coordinates_from_address(address))
+        # print(coordinate)
+        if coordinate:
+            latitude, longitude = coordinate
+
         with connection.cursor() as cursor:
             cursor.execute("""
-                    INSERT INTO users_user (username, password, first_name, last_name, email, role, phone, address, status, date_joined, is_superuser, is_staff, is_active)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s, %s, %s) RETURNING id
-                """, [username, hashed_password, first_name, last_name, email, role, phone, address, status_user, False,
-                      False,
-                      True])
-            user_id = cursor.fetchone()[0]
-
-        return Response({"id": user_id, "message": "User created successfully"}, status=status.HTTP_201_CREATED)
+                INSERT INTO users_user 
+                (username, password, first_name, last_name, email, role, phone, address, status, latitude, longitude, is_superuser ,is_active, is_staff, date_joined)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+            """, [
+                username, hashed_password, first_name, last_name, email, role, phone, address, status_user,
+                latitude, longitude, is_superuser, is_active, is_staff
+            ])
+        return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
 
     def put(self, request, pk):
         data = request.data
