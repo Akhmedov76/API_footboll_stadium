@@ -5,6 +5,9 @@ from users.serializers import UserSerializer
 
 
 class FootballStadiumSerializer(serializers.ModelSerializer):
+    """
+    Serializer for FootballStadium model.
+    """
     owner = UserSerializer(read_only=True)
 
     class Meta:

@@ -10,16 +10,25 @@ from utils.geo_loc import get_distance
 
 
 class FootballStadiumViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing football stadiums.
+    """
     queryset = FootballStadium.objects.all()
     serializer_class = FootballStadiumSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
+        """
+        Save the stadium with the current user.
+        """
         if not self.request.user.is_staff and self.request.user.role != "manager":
             return Response({"error": "Only managers can create stadiums."}, status=status.HTTP_403_FORBIDDEN)
         serializer.save(owner=self.request.user)
 
     def get_permissions(self):
+        """
+        Allow or deny access to list, create, update, partial_update and delete operations.
+        """
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
             permission_classes = [permissions.IsAuthenticated]
         else:
@@ -28,11 +37,17 @@ class FootballStadiumViewSet(viewsets.ModelViewSet):
 
 
 class NearlyStadionField(viewsets.ModelViewSet):
+    """
+    ViewSet for managing nearby football stadiums.
+    """
     serializer_class = FootballStadiumSerializer
 
     # permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Get all nearby football stadiums within 50 km.
+        """
         user = self.request.user
 
         if not user.latitude or not user.longitude:
@@ -56,6 +71,9 @@ class StadiumViewSet(APIView):
     """
 
     def get(self, request):
+        """
+        Get all active stadiums
+        """
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT id, name, address, contact, status, owner_id FROM footboll_stadium_footballstadium WHERE status = 'active'"
@@ -142,7 +160,8 @@ class GetNearbyStadium(APIView):
             cursor.execute("""
                 SELECT 
                     s.id AS stadium_id, 
-                    s.name AS stadium_name, 
+                    s.name AS stadium_name,
+                    s.description AS description, 
                     s.latitude, 
                     s.longitude,
                     f.id AS field_id, 
@@ -165,7 +184,7 @@ class GetNearbyStadium(APIView):
             distance = get_distance(point1, point2)
             distance_km = round(distance, 2)
 
-            if distance_km <= 500:
+            if distance_km <= 50:
                 nearby_stadiums.append(stadium)
 
         return Response(nearby_stadiums, status=status.HTTP_200_OK)

@@ -1,5 +1,4 @@
 import asyncio
-from math import cos, radians
 
 from django.db import models
 
@@ -8,6 +7,9 @@ from utils.geolocations import get_coordinates_from_address
 
 
 class FootballStadium(models.Model):
+    """
+        Football stadium model for users.
+    """
     STATUS_CHOICES = [('active', 'Active'),
                       ('inactive', 'Inactive')
                       ]
