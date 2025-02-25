@@ -176,7 +176,7 @@ class GetStadiumByFilterTime(APIView):
     Get stadiums based filter by time
     """
 
-    def post(self, request):
+    def get(self, request):
         start_time = request.GET.get('start_time')
         end_time = request.GET.get('end_time')
         if not start_time or not end_time:

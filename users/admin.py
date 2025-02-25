@@ -1,9 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
-from django.contrib import admin
-from users.models import User
 from django.utils.translation import gettext_lazy as _
+
+from users.models import User
 
 
 class CustomUserAdmin(UserAdmin):
@@ -11,7 +11,8 @@ class CustomUserAdmin(UserAdmin):
     list_filter = ('role', 'is_staff', 'is_superuser')
     fieldsets = (
         (_('User info'), {'fields': ('username', 'password')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email', 'phone', 'address')}),
+        (_('Personal info'),
+         {'fields': ('first_name', 'last_name', 'email', 'phone', 'address', 'latitude', 'longitude',)}),
         (_('Permissions'), {'fields': ('role', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
     )
 
