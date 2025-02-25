@@ -3,6 +3,9 @@ from rest_framework.routers import DefaultRouter
 
 from .views import BookingViewSet, confirm_booking, BookingsView
 
+"""
+    Crate API routes for bookings
+"""
 router = DefaultRouter()
 router.register(r'booking', BookingViewSet, basename='order')
 

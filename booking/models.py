@@ -5,6 +5,9 @@ from users.models import User
 
 
 class Booking(models.Model):
+    """
+        Booking model for stadiums and fields.
+    """
     STATUS_CHOICES = [('pending', 'Pending'),
                       ('confirmed', 'Confirmed'),
                       ('cancelled', 'Cancelled')

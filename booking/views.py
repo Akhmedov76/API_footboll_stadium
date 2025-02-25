@@ -10,11 +10,17 @@ from booking.serializers import BookingSerializer
 
 
 class BookingViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing bookings.
+    """
     queryset = Booking.objects.all()
     serializer_class = BookingSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
+        """
+        Save the booking with the current user.
+        """
         serializer.save(user=self.request.user)
 
     def get_queryset(self):
@@ -25,6 +31,9 @@ class BookingViewSet(viewsets.ModelViewSet):
 
 
 def confirm_booking(request, booking_id):
+    """
+    Confirm a booking
+    """
     booking = get_object_or_404(Booking, id=booking_id)
     booking.confirm()
     return HttpResponse("Booking has been confirmed!")
@@ -36,6 +45,9 @@ class BookingsView(APIView):
     """
 
     def get(self, request, *args, **kwargs):
+        """
+        Get all bookings fields
+        """
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT id, field_id, user_id, start_time, end_time, status FROM booking_booking"

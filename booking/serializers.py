@@ -1,10 +1,13 @@
-from django.utils.timezone import now
 from rest_framework import serializers
+
 from booking.models import Booking
 from footboll_field.models import FootballField
 
 
 class BookingSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Booking model.
+    """
     user = serializers.StringRelatedField(read_only=True)
     field = serializers.PrimaryKeyRelatedField(queryset=FootballField.objects.all())
     start_time = serializers.DateTimeField(format="%d.%m.%Y %H:%M:%S", input_formats=["%d.%m.%Y %H:%M:%S"])
@@ -16,6 +19,9 @@ class BookingSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'created_at', 'updated_at', 'user')
 
     def validate(self, data):
+        """
+        Validate that the start time is before the end time and that the field is not already booked for the given time range.
+        """
         start_time = data['start_time']
         end_time = data['end_time']
         field = data['field']
