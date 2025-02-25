@@ -1,5 +1,8 @@
-from django.db import connection
+from datetime import datetime
+
+from django.db import connection, DatabaseError
 from django.utils.translation import gettext_lazy as _
+from jsonschema.exceptions import ValidationError
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -200,28 +203,40 @@ class GetStadiumByFilterTime(APIView):
         end_time = request.GET.get('end_time')
         if not start_time or not end_time:
             return Response({"error": "Start time and end time are required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            start_time = [datetime.strptime(start_time, '%Y-%m-%dT%H:%M')]
+            end_time = [datetime.strptime(end_time, '%Y-%m-%dT%H:%M')]
 
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT 
-                    s.id AS stadium_id, 
-                    s.name AS stadium_name, 
-                    s.latitude, 
-                    s.longitude,
-                    f.id AS field_id, 
-                    f.name AS field_name, 
-                    f.price_per_hour, 
-                    f.working_hours_start, 
-                    f.working_hours_end
-                FROM footboll_stadium_footballstadium s
-                JOIN footboll_field_footballfield f ON s.id = f.stadium_id
-                LEFT JOIN booking_booking b 
-                    ON f.id = b.field_id 
-                    AND (b.start_time < %s AND b.end_time > %s)  
-                WHERE s.status = 'active' AND b.id IS NULL
-            """, [end_time, start_time])
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT 
+                        s.id AS stadium_id, 
+                        s.name AS stadium_name, 
+                        s.latitude, 
+                        s.longitude,
+                        f.id AS field_id, 
+                        f.name AS field_name, 
+                        f.price_per_hour, 
+                        f.working_hours_start, 
+                        f.working_hours_end
+                    FROM footboll_stadium_footballstadium s
+                    JOIN footboll_field_footballfield f ON s.id = f.stadium_id
+                    LEFT JOIN booking_booking b 
+                        ON f.id = b.field_id 
+                        AND (b.start_time < %s AND b.end_time > %s)  
+                    WHERE s.status = 'active' AND b.id IS NULL
+                """, [end_time, start_time])
 
-            columns = [col[0] for col in cursor.description]
-            stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                columns = [col[0] for col in cursor.description]
+                stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
+                print(stadiums)
 
-        return Response(stadiums, status=status.HTTP_200_OK)
+            return Response(stadiums, status=status.HTTP_200_OK)
+        except DatabaseError as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

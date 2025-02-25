@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import connection
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -77,6 +79,9 @@ class BookingsView(APIView):
         if not field_id or not start_time or not end_time:
             return Response({"error": "Field ID, start time, and end time are required."},
                             status=status.HTTP_400_BAD_REQUEST)
+
+        start_time = [datetime.strptime(start_time, '%Y-%m-%dT%H:%M')]
+        end_time = [datetime.strptime(end_time, '%Y-%m-%dT%H:%M')]
 
         with connection.cursor() as cursor:
             cursor.execute("INSERT INTO booking_booking (field_id, user_id, start_time, end_time, status, created_at, "
