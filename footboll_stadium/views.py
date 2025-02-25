@@ -27,6 +27,29 @@ class FootballStadiumViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
+class NearlyStadionField(viewsets.ModelViewSet):
+    serializer_class = FootballStadiumSerializer
+
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        if not user.latitude or not user.longitude:
+            return FootballStadium.objects.none()
+
+        nearby_stadions = []
+        for stadion in FootballStadium.objects.all():
+            point1 = (stadion.latitude, stadion.longitude,)
+            point2 = (user.latitude, user.longitude,)
+            distance = get_distance(point1, point2)
+            if distance <= 50:
+                nearby_stadions.append(stadion.id)
+        print(nearby_stadions)
+
+        return FootballStadium.objects.filter(id__in=nearby_stadions)
+
+
 class StadiumViewSet(APIView):
     """
     Get a list all the stadiums
@@ -103,29 +126,6 @@ class StadiumViewSet(APIView):
                 DELETE FROM footboll_stadium_footballstadium WHERE id=%s
             """, [pk])
         return Response({"message": _("Stadium deleted successfully")}, status=status.HTTP_200_OK)
-
-
-class NearlyStadionField(viewsets.ModelViewSet):
-    serializer_class = FootballStadiumSerializer
-
-    # permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-
-        if not user.latitude or not user.longitude:
-            return FootballStadium.objects.none()
-
-        nearby_stadions = []
-        for stadion in FootballStadium.objects.all():
-            point1 = (stadion.latitude, stadion.longitude,)
-            point2 = (user.latitude, user.longitude,)
-            distance = get_distance(point1, point2)
-            if distance <= 50:
-                nearby_stadions.append(stadion.id)
-        print(nearby_stadions)
-
-        return FootballStadium.objects.filter(id__in=nearby_stadions)
 
 
 class GetNearbyStadium(APIView):
