@@ -1,8 +1,13 @@
 from rest_framework import serializers
+
 from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Serializer for User model.
+    """
+
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'role', 'phone', 'address')
@@ -10,6 +15,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for registering a new user.
+    """
     password = serializers.CharField(write_only=True)
 
     class Meta:

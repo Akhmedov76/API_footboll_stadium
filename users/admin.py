@@ -7,6 +7,9 @@ from users.models import User
 
 
 class CustomUserAdmin(UserAdmin):
+    """
+    Custom user admin for stadium booking application.
+    """
     list_display = ('username', 'email', 'role', 'phone', 'address', 'is_staff', 'is_active')
     list_filter = ('role', 'is_staff', 'is_superuser')
     fieldsets = (

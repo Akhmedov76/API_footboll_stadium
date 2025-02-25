@@ -13,17 +13,26 @@ from .serializers import UserSerializer, UserRegistrationSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing users.
+    """
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
     # permission_classes = [permissions.IsAuthenticated]
 
     def get_permissions(self):
+        """
+        Define permissions for different actions.
+        """
         if self.action == 'create':
             return [permissions.AllowAny()]
         return super().get_permissions()
 
     def get_queryset(self):
+        """
+        Filter users based on the users role and permissions.
+        """
         user = self.request.user
         if user.is_superuser:
             return User.objects.all()
@@ -32,14 +41,23 @@ class UserViewSet(viewsets.ModelViewSet):
         return User.objects.filter(id=user.id)
 
     def get_serializer_class(self):
+        """
+        Use the serializer class to create instances
+        """
         if self.action == 'create':
             return UserRegistrationSerializer
         return UserSerializer
 
 
 class UserView(APIView):
+    """
+    View for managing users.
+    """
 
     def get(self, request):
+        """
+        Get all users
+        """
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT id, username, first_name, last_name, email, role, phone, address, status FROM users_user",
@@ -49,6 +67,9 @@ class UserView(APIView):
         return Response(users, status=status.HTTP_200_OK)
 
     def post(self, request):
+        """
+        Create a new user for user profile
+        """
         data = request.data
         username = data.get("username")
         password = data.get("password")
@@ -88,6 +109,9 @@ class UserView(APIView):
         return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
 
     def put(self, request, pk):
+        """
+        Update user profile by user_id
+        """
         data = request.data
         password = data.get("password")
 
@@ -102,6 +126,9 @@ class UserView(APIView):
         return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
 
     def delete(self, request, pk):
+        """
+        Delete user profile by user_id
+        """
         with connection.cursor() as cursor:
             cursor.execute("""
                     DELETE FROM users_user WHERE id=%s

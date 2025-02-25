@@ -8,6 +8,9 @@ from utils.geolocations import get_coordinates_from_address
 
 
 class User(AbstractUser):
+    """
+        Custom user model for stadium booking application.
+    """
     ROLES = (
         ('admin', 'Admin'),
         ('manager', 'Manager'),
@@ -25,6 +28,9 @@ class User(AbstractUser):
         return self.username
 
     def save(self, *args, **kwargs):
+        """
+        Get latitude and longitude from address when saving a user.
+        """
         if self.address:
             coordinates = asyncio.run(get_coordinates_from_address(self.address))
             print(coordinates)
