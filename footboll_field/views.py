@@ -8,6 +8,9 @@ from .serializers import FootballFieldSerializer
 
 
 class FootballFieldViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing football fields.
+    """
     queryset = FootballField.objects.all()
     serializer_class = FootballFieldSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -19,12 +22,10 @@ class FootballFieldViewSet(viewsets.ModelViewSet):
         return FootballField.objects.all()
 
 
-""" 
-Use this method to create a new model 
-"""
-
-
 class FootballFieldView(APIView):
+    """
+    View for managing football fields.
+    """
 
     def get(self, request):
         """

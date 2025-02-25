@@ -5,6 +5,9 @@ from .models import FootballField
 
 
 class FootballFieldSerializer(serializers.ModelSerializer):
+    """
+    Serializer for FootballField model.
+    """
     user = UserSerializer(read_only=True)
 
     class Meta:

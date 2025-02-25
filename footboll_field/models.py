@@ -1,10 +1,13 @@
-from datetime import timedelta, datetime
 from django.db import models
+
 from footboll_stadium.models import FootballStadium
 from users.models import User
 
 
 class FootballField(models.Model):
+    """
+        Football field model for stadiums.
+    """
     STATUS_CHOICES = [('active', 'Active'),
                       ('inactive', 'Inactive')
                       ]
