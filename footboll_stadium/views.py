@@ -173,7 +173,7 @@ class GetNearbyStadium(APIView):
 
 class GetStadiumByFilterTime(APIView):
     """
-    Get stadiums based filter by time
+    Get stadiums filtered by available time slots
     """
 
     def get(self, request):
@@ -193,14 +193,16 @@ class GetStadiumByFilterTime(APIView):
                     f.name AS field_name, 
                     f.price_per_hour, 
                     f.working_hours_start, 
-                    f.working_hours_end,
-                    b.start_time,
-                    b.end_time 
+                    f.working_hours_end
                 FROM footboll_stadium_footballstadium s
                 JOIN footboll_field_footballfield f ON s.id = f.stadium_id
                 LEFT JOIN booking_booking b 
-            """, [start_time, end_time])
+                    ON f.id = b.field_id 
+                    AND (b.start_time < %s AND b.end_time > %s)  
+                WHERE s.status = 'active' AND b.id IS NULL
+            """, [end_time, start_time])
 
             columns = [col[0] for col in cursor.description]
             stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
         return Response(stadiums, status=status.HTTP_200_OK)
