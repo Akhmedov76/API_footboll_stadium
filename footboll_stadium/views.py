@@ -3,7 +3,8 @@ from datetime import datetime
 from django.db import connection, DatabaseError
 from django.utils.translation import gettext_lazy as _
 from jsonschema.exceptions import ValidationError
-from rest_framework import viewsets, permissions, status
+from rest_framework import status
+from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -222,11 +223,18 @@ class GetStadiumByFilterTime(APIView):
     def get(self, request):
         start_time = request.GET.get('start_time')
         end_time = request.GET.get('end_time')
+
+        page = request.GET.get('page', 1)
+        page_size = request.GET.get('page_size', 10)
+
+        limit, offset = paginate_query(page, page_size)
+
         if not start_time or not end_time:
             return Response({"error": "Start time and end time are required."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            start_time = [datetime.strptime(start_time, '%Y-%m-%dT%H:%M')]
-            end_time = [datetime.strptime(end_time, '%Y-%m-%dT%H:%M')]
+            start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M')
+            end_time = datetime.strptime(end_time, '%Y-%m-%d %H:%M')
 
             with connection.cursor() as cursor:
                 cursor.execute("""
@@ -244,17 +252,19 @@ class GetStadiumByFilterTime(APIView):
                     JOIN footboll_field_footballfield f ON s.id = f.stadium_id
                     LEFT JOIN booking_booking b 
                         ON f.id = b.field_id 
-                        AND (b.start_time >= %s AND b.end_time >= %s)  
-                    WHERE s.status = 'active' AND b.id IS NULL
-                """, [end_time, start_time])
+                        AND (b.start_time > %s AND b.end_time > %s)  
+                    WHERE s.status = 'active' AND b.id IS NULL, LIIMIT %s OFFSET %s
+                """, [end_time, start_time, limit, offset])
 
                 columns = [col[0] for col in cursor.description]
                 stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
-                print(stadiums)
 
-            return Response(stadiums, status=status.HTTP_200_OK)
+            return Response({"page": page, "page_size": page_size, "stadiums": stadiums
+                             }, status=status.HTTP_200_OK)
+
         except DatabaseError as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
         except ValidationError as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
