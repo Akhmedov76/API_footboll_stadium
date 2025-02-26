@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 
 from booking.models import Booking
 from booking.serializers import BookingSerializer
+from utils.paginations import paginate_query
 
 
 class BookingViewSet(viewsets.ModelViewSet):
@@ -50,9 +51,15 @@ class BookingsView(APIView):
         """
         Get all bookings fields
         """
+        page = request.GET.get('page')
+        page_size = request.GET.get('page_size')
+
+        limit, offset = paginate_query(page, page_size)
+
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT id, field_id, user_id, start_time, end_time, status FROM booking_booking"
+                "SELECT id, field_id, user_id, start_time, end_time, status FROM booking_booking LIMIT %s OFFSET %s",
+                [limit, offset]
             )
             columns = [col[0] for col in cursor.description]
             bookings = [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -61,7 +68,8 @@ class BookingsView(APIView):
             booking["start_time"] = booking["start_time"].strftime("%d.%m.%Y %H:%M:%S")
             booking["end_time"] = booking["end_time"].strftime("%d.%m.%Y %H:%M:%S")
 
-        return Response(bookings, status=status.HTTP_200_OK)
+        return Response({"page": page, "page_size": page_size, "bookings": bookings},
+                        status=status.HTTP_200_OK)
 
     def post(self, request):
         """
