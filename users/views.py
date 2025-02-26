@@ -58,13 +58,23 @@ class UserView(APIView):
         """
         Get all users
         """
+        page = int(request.GET.get('page', 1))
+        page_size = int(request.GET.get('page_size', 2))
+
+        offset = (page - 1) * page_size
+
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT id, username, first_name, last_name, email, role, phone, address, status FROM users_user",
+                "SELECT id, username, first_name, last_name, email, role, phone, address, status FROM users_user LIMIT"
+                " %s OFFSET %s", [page_size, offset]
             )
+
             columns = [col[0] for col in cursor.description]
             users = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        return Response(users, status=status.HTTP_200_OK)
+        return Response(
+            {"page": page, "page_size": page_size, "users": users},
+            status=status.HTTP_200_OK,
+        )
 
     def post(self, request):
         """
