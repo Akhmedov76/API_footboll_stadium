@@ -253,7 +253,7 @@ class GetStadiumByFilterTime(APIView):
                     LEFT JOIN booking_booking b 
                         ON f.id = b.field_id 
                         AND (b.start_time > %s AND b.end_time > %s)  
-                    WHERE s.status = 'active' AND b.id IS NULL, LIIMIT %s OFFSET %s
+                    WHERE s.status = 'active' AND b.id IS NULL, LIMIT %s OFFSET %s
                 """, [end_time, start_time, limit, offset])
 
                 columns = [col[0] for col in cursor.description]
