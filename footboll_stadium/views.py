@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from footboll_stadium.models import FootballStadium
 from footboll_stadium.serializers import FootballStadiumSerializer
 from utils.geo_loc import get_distance
+from utils.paginations import paginate_query
 
 
 class FootballStadiumViewSet(viewsets.ModelViewSet):
@@ -77,13 +78,22 @@ class StadiumViewSet(APIView):
         """
         Get all active stadiums
         """
+        page = request.GET.get('page')
+        page_size = request.GET.get('page_size')
+
+        limit, offset = paginate_query(page, page_size)
+
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT id, name, address, contact, status, owner_id FROM footboll_stadium_footballstadium WHERE status = 'active'"
+                "SELECT id, name, address, contact, status, owner_id FROM footboll_stadium_footballstadium "
+                "WHERE status = 'active' LIMIT %s OFFSET %s", [limit, offset]
             )
             columns = [col[0] for col in cursor.description]
             stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        return Response(stadiums, status=status.HTTP_200_OK)
+        return Response(
+            {"page": page, "page_size": page_size, "stadiums": stadiums},
+            status=status.HTTP_200_OK,
+        )
 
     def post(self, request):
         """
