@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from utils.geolocations import get_coordinates_from_address
+from utils.paginations import paginate_query
 from .models import User
 from .serializers import UserSerializer, UserRegistrationSerializer
 
@@ -58,15 +59,15 @@ class UserView(APIView):
         """
         Get all users
         """
-        page = int(request.GET.get('page', 1))
-        page_size = int(request.GET.get('page_size', 2))
+        page = request.GET.get('page')
+        page_size = request.GET.get('page_size')
 
-        offset = (page - 1) * page_size
+        limit, offset = paginate_query(page, page_size)
 
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT id, username, first_name, last_name, email, role, phone, address, status FROM users_user LIMIT"
-                " %s OFFSET %s", [page_size, offset]
+                " %s OFFSET %s", [limit, offset]
             )
 
             columns = [col[0] for col in cursor.description]
