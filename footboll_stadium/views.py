@@ -169,11 +169,18 @@ class GetNearbyStadium(APIView):
         if not user.latitude or not user.longitude:
             return Response({"error": "User location not available."}, status=status.HTTP_400_BAD_REQUEST)
 
+        page = request.GET.get('page')
+        page_size = request.GET.get('page_size')
+
+        limit, offset = paginate_query(page, page_size)
+
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT 
                     s.id AS stadium_id, 
                     s.name AS stadium_name,
+                    s.address AS address, 
+                    s.contact AS contact, 
                     s.description AS description, 
                     s.latitude, 
                     s.longitude,
@@ -185,7 +192,7 @@ class GetNearbyStadium(APIView):
                 FROM footboll_stadium_footballstadium s
                 JOIN footboll_field_footballfield f ON s.id = f.stadium_id
                 WHERE s.status = 'active'
-            """)
+            """, [limit, offset])
 
             columns = [col[0] for col in cursor.description]
             stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -199,8 +206,12 @@ class GetNearbyStadium(APIView):
 
             if distance_km <= 50:
                 nearby_stadiums.append(stadium)
-
-        return Response(nearby_stadiums, status=status.HTTP_200_OK)
+        #################################################################################################################
+        # nearby_stadiums = sorted(nearby_stadiums, key=lambda x: (                                                    ##
+        #     get_distance((x['latitude'], x['longitude']), (user.latitude, user.longitude)), x['stadium_id']))        ##
+        #################################################################################################################
+        return Response({"page": page, "page_size": page_size, "Nearly stadion": nearby_stadiums},
+                        status=status.HTTP_200_OK)  ##
 
 
 class GetStadiumByFilterTime(APIView):
