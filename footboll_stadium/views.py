@@ -223,7 +223,7 @@ class GetStadiumByFilterTime(APIView):
                     JOIN footboll_field_footballfield f ON s.id = f.stadium_id
                     LEFT JOIN booking_booking b 
                         ON f.id = b.field_id 
-                        AND (b.start_time < %s AND b.end_time > %s)  
+                        AND (b.start_time >= %s AND b.end_time >= %s)  
                     WHERE s.status = 'active' AND b.id IS NULL
                 """, [end_time, start_time])
 
