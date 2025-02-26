@@ -174,45 +174,53 @@ class GetNearbyStadium(APIView):
         page_size = request.GET.get('page_size')
 
         limit, offset = paginate_query(page, page_size)
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    SELECT 
+                        s.id AS stadium_id, 
+                        s.name AS stadium_name,
+                        s.address AS address, 
+                        s.contact AS contact, 
+                        s.description AS description, 
+                        s.latitude, 
+                        s.longitude,
+                        f.id AS field_id, 
+                        f.name AS field_name, 
+                        f.price_per_hour, 
+                        f.working_hours_start, 
+                        f.working_hours_end
+                    FROM footboll_stadium_footballstadium s
+                    JOIN footboll_field_footballfield f ON s.id = f.stadium_id
+                    WHERE s.status = 'active'
+                """, [limit, offset])
 
-        with connection.cursor() as cursor:
-            cursor.execute("""
-                SELECT 
-                    s.id AS stadium_id, 
-                    s.name AS stadium_name,
-                    s.address AS address, 
-                    s.contact AS contact, 
-                    s.description AS description, 
-                    s.latitude, 
-                    s.longitude,
-                    f.id AS field_id, 
-                    f.name AS field_name, 
-                    f.price_per_hour, 
-                    f.working_hours_start, 
-                    f.working_hours_end
-                FROM footboll_stadium_footballstadium s
-                JOIN footboll_field_footballfield f ON s.id = f.stadium_id
-                WHERE s.status = 'active'
-            """, [limit, offset])
+                columns = [col[0] for col in cursor.description]
+                stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-            columns = [col[0] for col in cursor.description]
-            stadiums = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            nearby_stadiums = []
+            for stadium in stadiums:
+                point1 = (stadium['latitude'], stadium['longitude'])
+                point2 = (user.latitude, user.longitude)
+                distance = get_distance(point1, point2)
+                distance_km = round(distance, 2)
 
-        nearby_stadiums = []
-        for stadium in stadiums:
-            point1 = (stadium['latitude'], stadium['longitude'])
-            point2 = (user.latitude, user.longitude)
-            distance = get_distance(point1, point2)
-            distance_km = round(distance, 2)
+                if distance_km <= 50:
+                    nearby_stadiums.append(stadium)
+            #################################################################################################################
+            # nearby_stadiums = sorted(nearby_stadiums, key=lambda x: (                                                    ##
+            #     get_distance((x['latitude'], x['longitude']), (user.latitude, user.longitude)), x['stadium_id']))        ##
+            #################################################################################################################
+            return Response({"page": page, "page_size": page_size, "Nearly stadion": nearby_stadiums},
+                            status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-            if distance_km <= 50:
-                nearby_stadiums.append(stadium)
-        #################################################################################################################
-        # nearby_stadiums = sorted(nearby_stadiums, key=lambda x: (                                                    ##
-        #     get_distance((x['latitude'], x['longitude']), (user.latitude, user.longitude)), x['stadium_id']))        ##
-        #################################################################################################################
-        return Response({"page": page, "page_size": page_size, "Nearly stadion": nearby_stadiums},
-                        status=status.HTTP_200_OK)  ##
+        except DatabaseError as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetStadiumByFilterTime(APIView):
