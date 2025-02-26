@@ -3,6 +3,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from utils.paginations import paginate_query
 from .models import FootballField
 from .serializers import FootballFieldSerializer
 
@@ -31,10 +32,16 @@ class FootballFieldView(APIView):
         """
         Get all football fields
         """
+        page = request.GET.get('page')
+        page_size = request.GET.get('page_size')
+
+        limit, offset = paginate_query(page, page_size)
+
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT id, name, stadium_id, image, price_per_hour, status, created_at, updated_at, "
-                "working_hours_start, working_hours_end FROM footboll_field_footballfield WHERE status = 'active'"
+                "working_hours_start, working_hours_end FROM footboll_field_footballfield WHERE status = 'active' "
+                "LIMIT %s OFFSET %s", [limit, offset]
             )
             columns = [col[0] for col in cursor.description]
             football_fields = [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -42,7 +49,9 @@ class FootballFieldView(APIView):
         for fields in football_fields:
             fields["created_at"] = fields["created_at"].strftime("%d.%m.%Y %H:%M:%S")
             fields["updated_at"] = fields["updated_at"].strftime("%d.%m.%Y %H:%M:%S")
-        return Response(football_fields, status=status.HTTP_200_OK)
+
+        return Response({"page": page, "page_size": page_size, "Football fields": football_fields},
+                        status=status.HTTP_200_OK)
 
     def post(self, request):
         """
