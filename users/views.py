@@ -8,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from utils.geolocations import get_coordinates_from_address
-from utils.paginations import paginate_query
 from .models import User
 from .serializers import UserSerializer, UserRegistrationSerializer
 
@@ -51,29 +50,27 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class UserView(APIView):
-    """
-    View for managing users.
-    """
-
     def get(self, request):
-        """
-        Get all users
-        """
-        page = request.GET.get('page')
-        page_size = request.GET.get('page_size')
-
-        limit, offset = paginate_query(page, page_size)
+        page_size = int(request.GET.get('page_size', 10))
+        last_id = request.GET.get('last_id', 0)
 
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT id, username, first_name, last_name, email, role, phone, address, status FROM users_user LIMIT"
-                " %s OFFSET %s", [limit, offset]
+                """
+                SELECT id, username, first_name, last_name, email, role, phone, address, status 
+                FROM users_user 
+                WHERE id > %s 
+                ORDER BY id 
+                LIMIT %s
+                """,
+                [last_id, page_size]
             )
 
             columns = [col[0] for col in cursor.description]
             users = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
         return Response(
-            {"page": page, "page_size": page_size, "users": users},
+            {"last_id": users[-1]["id"] if users else None, "users": users},
             status=status.HTTP_200_OK,
         )
 
@@ -142,7 +139,7 @@ class UserView(APIView):
         """
         with connection.cursor() as cursor:
             cursor.execute("""
-                    DELETE FROM users_user WHERE id=%s
+                    DELETE FROM users_user WHERE id=%s;
                 """, [pk])
 
         return Response({"message": "User deleted successfully"}, status=status.HTTP_200_OK)

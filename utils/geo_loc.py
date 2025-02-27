@@ -1,4 +1,3 @@
-from scipy.spatial import distance
 from math import sin, cos, sqrt, atan2, radians
 
 

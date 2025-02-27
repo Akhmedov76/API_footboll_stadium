@@ -1,6 +1,7 @@
 import asyncio
 
 from django.db import models
+from django.utils.timezone import now
 
 from users.models import User
 from utils.geolocations import get_coordinates_from_address
@@ -29,6 +30,7 @@ class FootballStadium(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
+        self.date_joined = now().strftime("%Y-%m-%d %H:%M:%S")
         if self.address:
             coordinates = asyncio.run(get_coordinates_from_address(self.address))
             if coordinates:
