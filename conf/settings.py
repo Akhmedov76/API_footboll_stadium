@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     'footboll_field',
     'booking',
 
+
+
 ]
 
 MIDDLEWARE = [
